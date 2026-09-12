@@ -1,0 +1,56 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String?  @unique  // For Diner login
+  email     String?  @unique  // For Restaurant/Admin login
+  password  String?           // For Restaurant/Admin login
+  role      String   @default("DINER") // Can be: DINER, RESTAURANT, ADMIN
+  points    Int      @default(0)       // Loyalty points
+  createdAt DateTime @default(now())
+
+  restaurant Restaurant?
+  claims     Claim[]
+}
+
+model Restaurant {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("PENDING") // Admins will change this to APPROVED
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  offers      Offer[]
+  createdAt   DateTime @default(now())
+}
+
+model Offer {
+  id           String     @id @default(cuid())
+  title        String
+  discountPct  Int        // e.g., 20 (for 20% off)
+  validFrom    DateTime
+  validTo      DateTime
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  claims       Claim[]
+  createdAt    DateTime   @default(now())
+}
+
+model Claim {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  offerId     String
+  offer       Offer    @relation(fields: [offerId], references: [id])
+  status      String   @default("CLAIMED") // Changes to REDEEMED after payment
+  amountPaid  Float?   // E.g., 100
+  platformFee Float?   // 10% commission
+  createdAt   DateTime @default(now())
+}
