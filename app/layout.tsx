@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { AppProvider } from "./store";
 
 export const metadata: Metadata = {
   title: "Melbourne Hackathon 2026",
@@ -15,10 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
+        <AppProvider>
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+        </AppProvider>
       </body>
     </html>
   );
